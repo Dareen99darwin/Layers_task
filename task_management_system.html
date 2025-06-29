@@ -1,0 +1,1225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Company Task Management System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            color: #2c3e50;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .header p {
+            color: #7f8c8d;
+            font-size: 1.1em;
+        }
+
+        .tabs {
+            display: flex;
+            margin-bottom: 30px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 5px;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 15px 20px;
+            text-align: center;
+            background: transparent;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 600;
+            color: #6c757d;
+            transition: all 0.3s ease;
+        }
+
+        .tab.active {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .form-container {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #2c3e50;
+            font-weight: 600;
+            font-size: 1.1em;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            font-size: 1em;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .form-group textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .tasks-container {
+            display: grid;
+            gap: 20px;
+        }
+
+        .task-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            border-left: 5px solid #667eea;
+            transition: all 0.3s ease;
+        }
+
+        .task-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .task-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+
+        .task-title {
+            font-size: 1.3em;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+
+        .task-status {
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-in-progress {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .status-completed {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-overdue {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .task-meta {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+            font-size: 0.95em;
+            color: #6c757d;
+        }
+
+        .task-meta div {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .task-description {
+            margin-bottom: 15px;
+            line-height: 1.6;
+            color: #495057;
+        }
+
+        .task-link {
+            display: inline-block;
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+
+        .task-link:hover {
+            text-decoration: underline;
+        }
+
+        .notification-indicator {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #28a745;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(40, 167, 69, 0.3);
+            font-weight: 600;
+            opacity: 0;
+            transform: translateX(100%);
+            transition: all 0.3s ease;
+        }
+
+        .notification-indicator.show {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .filters {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 10px 20px;
+            border: 2px solid #e9ecef;
+            background: white;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 600;
+            color: #6c757d;
+            transition: all 0.3s ease;
+        }
+
+        .filter-btn.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-number {
+            font-size: 2.5em;
+            font-weight: 700;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            color: #6c757d;
+            font-weight: 600;
+        }
+
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .container {
+                padding: 20px;
+            }
+            
+            .task-meta {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📋 Task Management System</h1>
+            <p>Streamline your company's workflow with intelligent task tracking</p>
+        </div>
+
+        <!-- User Login Section -->
+        <div id="loginSection" class="form-container" style="max-width: 400px; margin: 20px auto;">
+            <h2>🔐 Login to Task Management System</h2>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="loginName">Name</label>
+                    <input type="text" id="loginName" required placeholder="Enter your name">
+                </div>
+                <div class="form-group">
+                    <label for="loginPhone">Phone Number</label>
+                    <input type="text" id="loginPhone" required placeholder="Enter your phone number">
+                </div>
+                <button type="submit" class="btn">Login</button>
+            </form>
+        </div>
+
+        <!-- Main Application (Hidden until login) -->
+        <div id="mainApp" style="display: none;">
+            <div class="user-info" style="background: #f8f9fa; padding: 15px; border-radius: 10px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <span id="welcomeMessage" style="font-weight: 600; color: #2c3e50;"></span>
+                    <span id="roleIndicator" style="margin-left: 10px; padding: 5px 10px; border-radius: 15px; font-size: 0.8em; font-weight: 600;"></span>
+                </div>
+                <button onclick="logout()" style="background: #dc3545; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer;">Logout</button>
+            </div>
+
+            <div class="tabs">
+                <button class="tab active" onclick="switchTab('dashboard')">📊 Dashboard</button>
+                <button class="tab" id="createTab" onclick="switchTab('create')">➕ Create Task</button>
+                <button class="tab" onclick="switchTab('tasks')">📝 Tasks</button>
+                <button class="tab" onclick="switchTab('data')">💾 Company Data</button>
+            </div>
+
+        <!-- Dashboard Tab -->
+        <div id="dashboard" class="tab-content active">
+            <div class="stats">
+                <div class="stat-card">
+                    <div class="stat-number" id="totalTasks">0</div>
+                    <div class="stat-label">Total Tasks</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="pendingTasks">0</div>
+                    <div class="stat-label">Pending</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="completedTasks">0</div>
+                    <div class="stat-label">Completed</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="overdueTasks">0</div>
+                    <div class="stat-label">Overdue</div>
+                </div>
+            </div>
+            
+            <div class="form-container">
+                <h2>🔔 Telegram Notifications Status</h2>
+                <p style="margin-bottom: 20px;">Notifications will be sent for:</p>
+                <ul style="list-style: none; padding-left: 0;">
+                    <li style="margin-bottom: 10px;">✅ New task assignments</li>
+                    <li style="margin-bottom: 10px;">⏰ 1 hour before deadline</li>
+                    <li style="margin-bottom: 10px;">📅 Daily summary at 6 PM</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Create Task Tab -->
+        <div id="create" class="tab-content">
+            <div class="form-container">
+                <h2>Create New Task</h2>
+                <form id="taskForm">
+                    <div class="form-group">
+                        <label for="taskTitle">Task Title</label>
+                        <input type="text" id="taskTitle" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="taskDescription">Task Description</label>
+                        <textarea id="taskDescription" placeholder="Describe the task in detail..."></textarea>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="assignedTo">Assigned To</label>
+                            <select id="assignedTo" required>
+                                <option value="">Select team member</option>
+                                <option value="john.doe" data-chat-id="">John Doe</option>
+                                <option value="jane.smith" data-chat-id="">Jane Smith</option>
+                                <option value="mike.johnson" data-chat-id="">Mike Johnson</option>
+                                <option value="sarah.wilson" data-chat-id="">Sarah Wilson</option>
+                                <option value="david.brown" data-chat-id="">David Brown</option>
+                            </select>
+                            <small style="color: #6c757d; margin-top: 5px; display: block;">
+                                ⚠️ Team members need to message @layers2025_bot first to receive notifications
+                            </small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="testChatId">Test Chat ID (Optional)</label>
+                            <input type="text" id="testChatId" placeholder="Enter your Telegram chat ID for testing">
+                            <small style="color: #6c757d; margin-top: 5px; display: block;">
+                                Message @layers2025_bot with /start to get your chat ID
+                            </small>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="priority">Priority</label>
+                            <select id="priority" required>
+                                <option value="low">Low</option>
+                                <option value="medium" selected>Medium</option>
+                                <option value="high">High</option>
+                                <option value="urgent">Urgent</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="status">Status</label>
+                            <select id="status" required>
+                                <option value="pending" selected>Pending</option>
+                                <option value="in-progress">In Progress</option>
+                                <option value="completed">Completed</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="deadline">Deadline</label>
+                        <input type="datetime-local" id="deadline" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="additionalLink">Additional Information Link</label>
+                        <input type="url" id="additionalLink" placeholder="https://example.com/additional-info">
+                    </div>
+
+                    <button type="submit" class="btn">Create Task & Send Notification</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- All Tasks Tab -->
+        <div id="tasks" class="tab-content">
+            <div class="filters">
+                <button class="filter-btn active" onclick="filterTasks('all')">All</button>
+                <button class="filter-btn" onclick="filterTasks('pending')">Pending</button>
+                <button class="filter-btn" onclick="filterTasks('in-progress')">In Progress</button>
+                <button class="filter-btn" onclick="filterTasks('completed')">Completed</button>
+                <button class="filter-btn" onclick="filterTasks('overdue')">Overdue</button>
+            </div>
+            
+            <div class="tasks-container" id="tasksContainer">
+                <!-- Tasks will be dynamically added here -->
+            </div>
+        </div>
+
+        <!-- Company Data Tab -->
+        <div id="data" class="tab-content">
+            <div class="form-container">
+                <h2>💾 Company Data Storage</h2>
+                <p style="margin-bottom: 20px;">This system serves as a centralized database for all company task-related data.</p>
+                
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
+                    <div style="background: #f8f9fa; padding: 20px; border-radius: 10px;">
+                        <h3>📊 Task Analytics</h3>
+                        <p>Complete task history and performance metrics</p>
+                    </div>
+                    <div style="background: #f8f9fa; padding: 20px; border-radius: 10px;">
+                        <h3>👥 Team Management</h3>
+                        <p>Employee assignments and workload tracking</p>
+                    </div>
+                    <div style="background: #f8f9fa; padding: 20px; border-radius: 10px;">
+                        <h3>⏰ Timeline Data</h3>
+                        <p>Deadline tracking and schedule optimization</p>
+                    </div>
+                    <div style="background: #f8f9fa; padding: 20px; border-radius: 10px;">
+                        <h3>🔗 Resource Links</h3>
+                        <p>Centralized access to project resources</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="notification-indicator" id="notification">
+        Task created successfully! Telegram notification sent.
+    </div>
+
+    <div id="editTaskModal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.3); z-index:1000; align-items:center; justify-content:center;">
+        <div style="background:white; border-radius:15px; padding:30px; min-width:300px; max-width:90vw;">
+            <h2>Edit Task</h2>
+            <form id="editTaskForm">
+                <input type="hidden" id="editTaskId">
+                <div class="form-group">
+                    <label for="editTaskTitle">Task Title</label>
+                    <input type="text" id="editTaskTitle" required>
+                </div>
+                <div class="form-group">
+                    <label for="editTaskDescription">Task Description</label>
+                    <textarea id="editTaskDescription"></textarea>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="editPriority">Priority</label>
+                        <select id="editPriority" required>
+                            <option value="low">Low</option>
+                            <option value="medium">Medium</option>
+                            <option value="high">High</option>
+                            <option value="urgent">Urgent</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="editStatus">Status</label>
+                        <select id="editStatus" required>
+                            <option value="pending">Pending</option>
+                            <option value="in-progress">In Progress</option>
+                            <option value="completed">Completed</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="editDeadline">Deadline</label>
+                    <input type="datetime-local" id="editDeadline" required>
+                </div>
+                <div class="form-group">
+                    <label for="editAdditionalLink">Additional Information Link</label>
+                    <input type="url" id="editAdditionalLink">
+                </div>
+                <div style="display:flex; gap:10px; justify-content:flex-end;">
+                    <button type="button" onclick="closeEditModal()" class="btn" style="background:#6c757d;">Cancel</button>
+                    <button type="submit" class="btn">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // User management and authentication
+        let currentUser = null;
+        let userChatIds = {};
+        let sessionUser = null;
+
+        // Initialize the system
+        document.addEventListener('DOMContentLoaded', function() {
+            loadUserData();
+            setupLoginForm();
+            autoLoginIfSessionExists();
+            populateAssignedToDropdown();
+        });
+
+        // Setup login form
+        function setupLoginForm() {
+            document.getElementById('loginForm').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                const name = document.getElementById('loginName').value.trim();
+                const phone = document.getElementById('loginPhone').value.trim();
+                if (!name || !phone) return;
+                currentUser = {
+                    name: name,
+                    phone: phone
+                };
+                // Save user in Supabase if not already present
+                await addUserToSupabase(name, phone);
+                // Save session user
+                localStorage.setItem('sessionUser', JSON.stringify(currentUser));
+                // Show main app
+                document.getElementById('loginSection').style.display = 'none';
+                document.getElementById('mainApp').style.display = 'block';
+                updateUIForRole();
+                await loadTasks();
+                updateStats();
+                displayTasks();
+                setupDeadlineChecks();
+                showNotification(`Welcome back, ${currentUser.name}!`);
+                // Update assignedTo dropdown for create task
+                await populateAssignedToDropdown();
+            });
+        }
+
+        // Update UI based on user role
+        function updateUIForRole() {
+            const welcomeMsg = document.getElementById('welcomeMessage');
+            const roleIndicator = document.getElementById('roleIndicator');
+            const createTab = document.getElementById('createTab');
+            
+            welcomeMsg.textContent = `Welcome, ${currentUser.name}`;
+            
+            if (currentUser.role === 'manager') {
+                roleIndicator.textContent = '👑 MANAGER';
+                roleIndicator.style.background = '#28a745';
+                roleIndicator.style.color = 'white';
+                createTab.style.display = 'block';
+            } else {
+                roleIndicator.textContent = '👤 EMPLOYEE';
+                roleIndicator.style.background = '#6c757d';
+                roleIndicator.style.color = 'white';
+                createTab.style.display = 'none'; // Employees can't create tasks
+            }
+        }
+
+        // Logout function
+        function logout() {
+            currentUser = null;
+            document.getElementById('mainApp').style.display = 'none';
+            document.getElementById('loginSection').style.display = 'block';
+            document.getElementById('loginForm').reset();
+            localStorage.removeItem('sessionUser');
+        }
+
+        // Save/load user data
+        function saveUserData() {
+            localStorage.setItem('userChatIds', JSON.stringify(userChatIds));
+        }
+
+        function loadUserData() {
+            const saved = localStorage.getItem('userChatIds');
+            if (saved) {
+                userChatIds = JSON.parse(saved);
+            }
+        }
+
+        // Task storage
+        let tasks = [];
+
+        // Tab switching
+        function switchTab(tabName) {
+            // Don't allow switching if not logged in
+            if (!currentUser) return;
+            
+            // Hide all tab contents
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            // Remove active class from all tabs
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Show selected tab content
+            document.getElementById(tabName).classList.add('active');
+            
+            // Add active class to clicked tab
+            event.target.classList.add('active');
+        }
+
+        // Telegram Bot Configuration
+        const TELEGRAM_BOT_TOKEN = '7340372771:AAEAoWSuHO-ANKZQIObkAgCzd-XmoEzFJPo';
+        const TELEGRAM_API_URL = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}`;
+
+        // Supabase CRUD for tasks
+        async function fetchTasksFromSupabase() {
+            const { data, error } = await supabase
+                .from('tasks')
+                .select('*')
+                .order('created_at', { ascending: false });
+            if (error) {
+                showNotification('❌ Failed to fetch tasks from cloud');
+                return [];
+            }
+            return data;
+        }
+
+        async function addTaskToSupabase(task) {
+            const { data, error } = await supabase
+                .from('tasks')
+                .insert([task]);
+            if (error) {
+                showNotification('❌ Failed to add task to cloud');
+                return null;
+            }
+            return data[0];
+        }
+
+        async function updateTaskInSupabase(task) {
+            const { data, error } = await supabase
+                .from('tasks')
+                .update(task)
+                .eq('id', task.id);
+            if (error) {
+                showNotification('❌ Failed to update task in cloud');
+                return null;
+            }
+            return data[0];
+        }
+
+        // Supabase CRUD for comments
+        async function fetchCommentsForTask(taskId) {
+            const { data, error } = await supabase
+                .from('comments')
+                .select('*')
+                .eq('task_id', taskId)
+                .order('created_at', { ascending: true });
+            if (error) {
+                showNotification('❌ Failed to fetch comments');
+                return [];
+            }
+            return data;
+        }
+
+        async function addCommentToTask(taskId, author, content) {
+            const { data, error } = await supabase
+                .from('comments')
+                .insert([{ task_id: taskId, author, content }]);
+            if (error) {
+                showNotification('❌ Failed to add comment');
+                return null;
+            }
+            return data[0];
+        }
+
+        // Replace loadTasks to use Supabase
+        async function loadTasks() {
+            tasks = await fetchTasksFromSupabase();
+            updateStats();
+            displayTasks();
+        }
+
+        // Replace saveTasks to use Supabase (no-op, kept for compatibility)
+        function saveTasks() {
+            // No longer needed, tasks are saved in Supabase
+        }
+
+        // Update task creation to use Supabase
+        const taskForm = document.getElementById('taskForm');
+        if (taskForm) {
+            taskForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                if (currentUser.role !== 'manager') {
+                    showNotification('❌ Only managers can create tasks');
+                    return;
+                }
+                const assignedTo = document.getElementById('assignedTo').value;
+                const newTask = {
+                    title: document.getElementById('taskTitle').value,
+                    description: document.getElementById('taskDescription').value,
+                    assigned_to: assignedTo,
+                    priority: document.getElementById('priority').value,
+                    status: document.getElementById('status').value,
+                    deadline: document.getElementById('deadline').value,
+                    additional_link: document.getElementById('additionalLink').value,
+                    created_by: currentUser.username
+                };
+                const added = await addTaskToSupabase(newTask);
+                if (added) {
+                    showNotification('Task created in cloud!');
+                    await loadTasks();
+                    this.reset();
+                    await sendTelegramNotification(added, assignedTo);
+                }
+            });
+        }
+
+        // Update task editing to use Supabase
+        const editTaskForm = document.getElementById('editTaskForm');
+        if (editTaskForm) {
+            editTaskForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                const id = parseInt(document.getElementById('editTaskId').value);
+                const task = tasks.find(t => t.id === id);
+                if (!task) return;
+                const oldStatus = task.status;
+                // Update fields to match Supabase schema
+                task.title = document.getElementById('editTaskTitle').value;
+                task.description = document.getElementById('editTaskDescription').value;
+                task.priority = document.getElementById('editPriority').value;
+                task.status = document.getElementById('editStatus').value;
+                task.deadline = document.getElementById('editDeadline').value;
+                task.additional_link = document.getElementById('editAdditionalLink').value;
+                const updated = await updateTaskInSupabase(task);
+                if (updated) {
+                    await loadTasks();
+                    closeEditModal();
+                    if (currentUser.role === 'manager') {
+                        await sendTelegramNotification(updated, updated.assigned_to, true);
+                    } else if (currentUser.role === 'employee' && oldStatus !== task.status) {
+                        await notifyManagerOfStatusChange(updated);
+                    }
+                    showNotification('Task updated in cloud!');
+                }
+            });
+        }
+
+        // Update displayTasks and createTaskCard to use Supabase field names
+        function displayTasks(filter = 'all') {
+            if (!currentUser) return;
+            const container = document.getElementById('tasksContainer');
+            container.innerHTML = '';
+            let filteredTasks = tasks;
+            if (currentUser.role === 'employee') {
+                filteredTasks = tasks.filter(task => task.assigned_to === currentUser.username);
+            }
+            if (filter !== 'all') {
+                if (filter === 'overdue') {
+                    filteredTasks = filteredTasks.filter(task => 
+                        new Date(task.deadline) < new Date() && task.status !== 'completed'
+                    );
+                } else {
+                    filteredTasks = filteredTasks.filter(task => task.status === filter);
+                }
+            }
+            if (filteredTasks.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 40px; color: #6c757d;">
+                        <h3>No tasks found</h3>
+                        <p>${currentUser.role === 'employee' ? 'No tasks assigned to you yet.' : 'No tasks match the current filter.'}</p>
+                    </div>
+                `;
+                return;
+            }
+            filteredTasks.forEach(task => {
+                const taskCard = createTaskCard(task);
+                container.appendChild(taskCard);
+            });
+        }
+
+        function createTaskCard(task) {
+            const card = document.createElement('div');
+            card.className = 'task-card';
+            const isOverdue = new Date(task.deadline) < new Date() && task.status !== 'completed';
+            const statusClass = isOverdue ? 'overdue' : task.status;
+            card.innerHTML = `
+                <div class="task-header">
+                    <div>
+                        <div class="task-title">${task.title}</div>
+                        <div style="color: #6c757d; font-size: 0.9em;">Created: ${task.created_at ? new Date(task.created_at).toLocaleDateString() : ''}</div>
+                    </div>
+                    <div class="task-status status-${statusClass}">
+                        ${isOverdue ? 'Overdue' : task.status.replace('-', ' ')}
+                    </div>
+                </div>
+                <div class="task-meta">
+                    <div>👤 <strong>Assigned to:</strong> ${task.assigned_to}</div>
+                    <div>⏰ <strong>Deadline:</strong> ${new Date(task.deadline).toLocaleString()}</div>
+                    <div>🔥 <strong>Priority:</strong> ${task.priority}</div>
+                </div>
+                <div class="task-description">${task.description}</div>
+                ${task.additional_link ? `<a href="${task.additional_link}" class="task-link" target="_blank">📎 Additional Information</a>` : ''}
+                <div style="margin-top:10px; display:flex; gap:10px;">
+                    ${(currentUser.role === 'manager' || (currentUser.role === 'employee' && task.assigned_to === currentUser.username)) ? `<button class="btn" style="padding:8px 15px; font-size:0.95em; background:#ffc107; color:#2c3e50;" onclick="openEditModal(${task.id})">Edit</button>` : ''}
+                </div>
+                <div class="task-comments" id="comments-for-${task.id}" style="margin-top:20px;">
+                    <div style="font-weight:600; color:#667eea; margin-bottom:8px;">💬 Comments</div>
+                    <div class="comments-list" id="comments-list-${task.id}" style="margin-bottom:10px;"></div>
+                    <form class="add-comment-form" onsubmit="return submitComment(event, ${task.id})" style="display:flex; gap:8px;">
+                        <input type="text" id="comment-input-${task.id}" placeholder="Add a comment..." style="flex:1; padding:8px; border-radius:6px; border:1px solid #e9ecef;">
+                        <button type="submit" class="btn" style="padding:8px 15px; font-size:0.95em;">Post</button>
+                    </form>
+                </div>
+            `;
+            // After rendering, fetch and display comments
+            setTimeout(() => loadAndDisplayComments(task.id), 0);
+            return card;
+        }
+
+        async function loadAndDisplayComments(taskId) {
+            const comments = await fetchCommentsForTask(taskId);
+            const listDiv = document.getElementById(`comments-list-${taskId}`);
+            if (!listDiv) return;
+            if (comments.length === 0) {
+                listDiv.innerHTML = '<div style="color:#aaa;">No comments yet.</div>';
+                return;
+            }
+            listDiv.innerHTML = comments.map(c =>
+                `<div style='margin-bottom:6px;'><span style='font-weight:600;'>${c.author}</span> <span style='color:#888; font-size:0.9em;'>${new Date(c.created_at).toLocaleString()}</span><br>${c.content}</div>`
+            ).join('');
+        }
+
+        window.submitComment = async function(event, taskId) {
+            event.preventDefault();
+            const input = document.getElementById(`comment-input-${task.id}`);
+            const content = input.value.trim();
+            if (!content) return false;
+            const author = currentUser ? currentUser.name : 'Anonymous';
+            const added = await addCommentToTask(taskId, author, content);
+            if (added) {
+                input.value = '';
+                loadAndDisplayComments(taskId);
+            }
+            return false;
+        }
+
+        // Filter tasks
+        function filterTasks(filter) {
+            // Update filter buttons
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            displayTasks(filter);
+        }
+
+        // Update statistics based on user role
+        function updateStats() {
+            if (!currentUser) return;
+            
+            let userTasks = tasks;
+            
+            // Filter tasks based on role
+            if (currentUser.role === 'employee') {
+                userTasks = tasks.filter(t => t.assigned_to === currentUser.username);
+            }
+            
+            const total = userTasks.length;
+            const pending = userTasks.filter(t => t.status === 'pending').length;
+            const completed = userTasks.filter(t => t.status === 'completed').length;
+            const overdue = userTasks.filter(t => 
+                new Date(t.deadline) < new Date() && t.status !== 'completed'
+            ).length;
+            
+            document.getElementById('totalTasks').textContent = total;
+            document.getElementById('pendingTasks').textContent = pending;
+            document.getElementById('completedTasks').textContent = completed;
+            document.getElementById('overdueTasks').textContent = overdue;
+        }
+
+        // Telegram notification functions
+        async function sendTelegramNotification(task, username, notifyUpdate = false) {
+            try {
+                const chatId = userChatIds[username] || '';
+                if (!chatId) {
+                    showNotification('⚠️ Task updated! But user has no Telegram chat ID.');
+                    return;
+                }
+                const message = notifyUpdate ?
+                    `✏️ <b>Task Updated</b>\n\n📋 <b>Title:</b> ${task.title}\n👤 <b>Assigned to:</b> ${task.assigned_to}\n🔥 <b>Priority:</b> ${task.priority.toUpperCase()}\n⏰ <b>Deadline:</b> ${new Date(task.deadline).toLocaleString()}\n📝 <b>Status:</b> ${task.status.replace('-', ' ')}\n\n<b>Description:</b>\n${task.description || 'No description provided'}\n${task.additional_link ? `🔗 <b>Additional Info:</b> ${task.additional_link}` : ''}\n\n<i>Task updated on ${new Date().toLocaleString()}</i>`
+                    : formatTaskMessage(task);
+                const response = await fetch(`${TELEGRAM_API_URL}/sendMessage`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ chat_id: chatId, text: message, parse_mode: 'HTML' })
+                });
+                if (response.ok) {
+                    showNotification('✅ Telegram notification sent!');
+                } else {
+                    const error = await response.json();
+                    showNotification(`❌ Notification failed: ${error.description}`);
+                }
+            } catch (error) {
+                showNotification('❌ Notification failed: Network error');
+                console.error('Telegram notification error:', error);
+            }
+        }
+
+        function formatTaskMessage(task) {
+            return `🆕 <b>New Task Assigned</b>
+
+📋 <b>Title:</b> ${task.title}
+👤 <b>Assigned to:</b> ${task.assigned_to}
+🔥 <b>Priority:</b> ${task.priority.toUpperCase()}
+⏰ <b>Deadline:</b> ${new Date(task.deadline).toLocaleString()}
+📝 <b>Status:</b> ${task.status.replace('-', ' ')}
+
+<b>Description:</b>
+${task.description || 'No description provided'}
+
+${task.additional_link ? `🔗 <b>Additional Info:</b> ${task.additional_link}` : ''}
+
+<i>Task created on ${new Date(task.created_at).toLocaleString()}</i>`;
+        }
+
+        async function sendDeadlineAlert(task) {
+            try {
+                const chatId = document.getElementById('testChatId').value;
+                if (!chatId) return;
+
+                const message = `⚠️ <b>DEADLINE ALERT</b>
+
+📋 <b>Task:</b> ${task.title}
+👤 <b>Assigned to:</b> ${task.assigned_to}
+⏰ <b>Due in 1 hour:</b> ${new Date(task.deadline).toLocaleString()}
+🔥 <b>Priority:</b> ${task.priority.toUpperCase()}
+
+<b>Don't forget to complete this task!</b>`;
+
+                await fetch(`${TELEGRAM_API_URL}/sendMessage`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        chat_id: chatId,
+                        text: message,
+                        parse_mode: 'HTML'
+                    })
+                });
+            } catch (error) {
+                console.error('Deadline alert error:', error);
+            }
+        }
+
+        async function sendDailySummaryMessage(upcomingTasks) {
+            try {
+                const chatId = document.getElementById('testChatId').value;
+                if (!chatId) return;
+
+                let message = `📅 <b>Daily Task Summary</b>
+
+<b>Tasks due by tomorrow (${upcomingTasks.length} total):</b>
+
+`;
+
+                if (upcomingTasks.length === 0) {
+                    message += "🎉 No tasks due tomorrow! You're all caught up.";
+                } else {
+                    upcomingTasks.forEach((task, index) => {
+                        message += `${index + 1}. <b>${task.title}</b>
+   ⏰ Due: ${new Date(task.deadline).toLocaleString()}
+   🔥 Priority: ${task.priority.toUpperCase()}
+
+`;
+                    });
+                }
+
+                await fetch(`${TELEGRAM_API_URL}/sendMessage`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        chat_id: chatId,
+                        text: message,
+                        parse_mode: 'HTML'
+                    })
+                });
+            } catch (error) {
+                console.error('Daily summary error:', error);
+            }
+        }
+
+        // Setup deadline monitoring
+        function setupDeadlineChecks() {
+            // Check for upcoming deadlines every minute
+            setInterval(checkDeadlines, 60000);
+            
+            // Daily summary at 6 PM
+            setInterval(sendDailySummary, 3600000); // Check every hour
+        }
+
+        // Show notification
+        function showNotification(message) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        // Check for upcoming deadlines
+        function checkDeadlines() {
+            const now = new Date();
+            const oneHourFromNow = new Date(now.getTime() + 60 * 60 * 1000);
+            
+            tasks.forEach(task => {
+                if (task.status !== 'completed') {
+                    const deadline = new Date(task.deadline);
+                    
+                    // Check if deadline is within 1 hour
+                    if (deadline > now && deadline <= oneHourFromNow) {
+                        sendDeadlineAlert(task);
+                    }
+                }
+            });
+        }
+
+        // Send daily summary
+        function sendDailySummary() {
+            const now = new Date();
+            
+            // Check if it's 6 PM
+            if (now.getHours() === 18 && now.getMinutes() === 0) {
+                const tomorrow = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+                const upcomingTasks = tasks.filter(task => {
+                    const deadline = new Date(task.deadline);
+                    return deadline >= now && deadline <= tomorrow && task.status !== 'completed';
+                });
+                
+                sendDailySummaryMessage(upcomingTasks);
+            }
+        }
+
+        // On DOMContentLoaded, check for session user
+        function autoLoginIfSessionExists() {
+            const session = localStorage.getItem('sessionUser');
+            if (session) {
+                sessionUser = JSON.parse(session);
+                currentUser = sessionUser;
+                document.getElementById('loginSection').style.display = 'none';
+                document.getElementById('mainApp').style.display = 'block';
+                updateUIForRole();
+                loadTasks();
+                updateStats();
+                displayTasks();
+                setupDeadlineChecks();
+                showNotification(`Welcome back, ${currentUser.name}!`);
+            }
+        }
+
+        function openEditModal(taskId) {
+            const task = tasks.find(t => t.id === taskId);
+            if (!task) return;
+            document.getElementById('editTaskId').value = task.id;
+            document.getElementById('editTaskTitle').value = task.title;
+            document.getElementById('editTaskDescription').value = task.description;
+            document.getElementById('editPriority').value = task.priority;
+            document.getElementById('editStatus').value = task.status;
+            document.getElementById('editDeadline').value = task.deadline;
+            document.getElementById('editAdditionalLink').value = task.additional_link;
+            document.getElementById('editTaskModal').style.display = 'flex';
+        }
+
+        function closeEditModal() {
+            document.getElementById('editTaskModal').style.display = 'none';
+        }
+
+        // Notify manager when employee updates status
+        async function notifyManagerOfStatusChange(task) {
+            // Find manager(s) in userChatIds
+            const managers = Object.keys(userChatIds).filter(u => {
+                const opt = document.querySelector(`#username option[value='${u}']`);
+                return opt && opt.dataset.role === 'manager';
+            });
+            for (const manager of managers) {
+                const chatId = userChatIds[manager];
+                if (!chatId) continue;
+                const message = `🔔 <b>Task Status Updated</b>\n\n📋 <b>Title:</b> ${task.title}\n👤 <b>Assigned to:</b> ${task.assigned_to}\n📝 <b>Status:</b> ${task.status.replace('-', ' ')}\n\n<i>Updated by ${currentUser.name} on ${new Date().toLocaleString()}</i>`;
+                await fetch(`${TELEGRAM_API_URL}/sendMessage`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ chat_id: chatId, text: message, parse_mode: 'HTML' })
+                });
+            }
+        }
+
+        // Add Supabase JS client in <head> (before </head>):
+        const SUPABASE_URL = 'https://xbyhaadzohsbxgloxkdx.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhieWhhYWR6b2hzYnhnbG94a2R4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTEyMjgwMTMsImV4cCI6MjA2NjgwNDAxM30.WLb3NNz0ydBZoC_KWUx0IKvHd-lk0XDx5cOu9GhJP7A';
+        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        // Add Supabase users table CRUD
+        async function fetchUsersFromSupabase() {
+            const { data, error } = await supabase
+                .from('users')
+                .select('*');
+            if (error) {
+                showNotification('❌ Failed to fetch users');
+                return [];
+            }
+            return data;
+        }
+
+        async function addUserToSupabase(name, phone) {
+            const { data, error } = await supabase
+                .from('users')
+                .insert([{ name, phone }]);
+            if (error) {
+                // Ignore duplicate error
+                if (!String(error.message).includes('duplicate'))
+                    showNotification('❌ Failed to add user');
+                return null;
+            }
+            return data ? data[0] : null;
+        }
+
+        // Populate Assigned To dropdown in create task form
+        async function populateAssignedToDropdown() {
+            const users = await fetchUsersFromSupabase();
+            const assignedToSelect = document.getElementById('assignedTo');
+            if (!assignedToSelect) return;
+            assignedToSelect.innerHTML = '<option value="">Select team member</option>';
+            users.forEach(user => {
+                assignedToSelect.innerHTML += `<option value="${user.name}">${user.name} (${user.phone})</option>`;
+            });
+        }
+    </script>
+</body>
+</html>
