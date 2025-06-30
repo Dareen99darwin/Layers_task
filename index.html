@@ -774,7 +774,7 @@
                     status: document.getElementById('status').value,
                     deadline: document.getElementById('deadline').value,
                     additional_link: document.getElementById('additionalLink').value,
-                    created_by: currentUser.username
+                    created_by: currentUser.name
                 };
                 const added = await addTaskToSupabase(newTask);
                 if (added) {
@@ -823,7 +823,7 @@
             container.innerHTML = '';
             let filteredTasks = tasks;
             if (currentUser.role === 'employee') {
-                filteredTasks = tasks.filter(task => task.assigned_to === currentUser.username);
+                filteredTasks = tasks.filter(task => task.assigned_to === currentUser.name);
             }
             if (filter !== 'all') {
                 if (filter === 'overdue') {
@@ -936,7 +936,7 @@
             
             // Filter tasks based on role
             if (currentUser.role === 'employee') {
-                userTasks = tasks.filter(t => t.assigned_to === currentUser.username);
+                userTasks = tasks.filter(t => t.assigned_to === currentUser.name);
             }
             
             const total = userTasks.length;
