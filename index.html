@@ -423,11 +423,6 @@
                         <textarea id="taskDescription" placeholder="Describe the task in detail..."></textarea>
                     </div>
 
-                    <div class="form-group">
-                        <label for="taskInfo">Task Information</label>
-                        <textarea id="taskInfo" placeholder="Enter any extra task information..."></textarea>
-                    </div>
-
                     <div class="form-row">
                         <div class="form-group">
                             <label for="assignedTo">Assigned To</label>
@@ -540,10 +535,6 @@
                 <div class="form-group">
                     <label for="editTaskDescription">Task Description</label>
                     <textarea id="editTaskDescription"></textarea>
-                </div>
-                <div class="form-group">
-                    <label for="editTaskInfo">Task Information</label>
-                    <textarea id="editTaskInfo" placeholder="Enter any extra task information..."></textarea>
                 </div>
                 <div class="form-row">
                     <div class="form-group">
@@ -700,7 +691,7 @@
         async function fetchTasksFromSupabase() {
             const { data, error } = await _supabase
                 .from('tasks')
-                .select('*')
+                .select('id, title, description, assigned_to, priority, status, deadline, additional_link, created_at, created_by')
                 .order('created_at', { ascending: false });
             if (error) {
                 showNotification('❌ Failed to fetch tasks from cloud');
@@ -778,7 +769,6 @@
                 const newTask = {
                     title: document.getElementById('taskTitle').value,
                     description: document.getElementById('taskDescription').value,
-                    task_info: document.getElementById('taskInfo').value,
                     assigned_to: assignedTo,
                     priority: document.getElementById('priority').value,
                     status: document.getElementById('status').value,
@@ -807,7 +797,6 @@
                 // Update fields to match Supabase schema
                 task.title = document.getElementById('editTaskTitle').value;
                 task.description = document.getElementById('editTaskDescription').value;
-                task.task_info = document.getElementById('editTaskInfo').value;
                 task.priority = document.getElementById('editPriority').value;
                 task.status = document.getElementById('editStatus').value;
                 task.deadline = document.getElementById('editDeadline').value;
@@ -876,7 +865,6 @@
                     <div>🔥 <strong>Priority:</strong> ${task.priority}</div>
                 </div>
                 <div class="task-description">${task.description}</div>
-                ${task.task_info ? `<div style='margin: 10px 0; color: #444;'><strong>Task Information:</strong><br>${task.task_info}</div>` : ''}
                 ${task.additional_link ? `<a href="${task.additional_link}" class="task-link" target="_blank">📎 Additional Information</a>` : ''}
                 <div style="margin-top:10px; display:flex; gap:10px;">
                     ${(task.assigned_to === currentUser.name) ?
@@ -1177,7 +1165,6 @@ ${task.additional_link ? `🔗 <b>Additional Info:</b> ${task.additional_link}` 
             document.getElementById('editTaskId').value = task.id;
             document.getElementById('editTaskTitle').value = task.title;
             document.getElementById('editTaskDescription').value = task.description;
-            document.getElementById('editTaskInfo').value = task.task_info || '';
             document.getElementById('editPriority').value = task.priority;
             document.getElementById('editStatus').value = task.status;
             document.getElementById('editDeadline').value = task.deadline;
