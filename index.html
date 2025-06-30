@@ -872,7 +872,10 @@
                 <div class="task-description">${task.description}</div>
                 ${task.additional_link ? `<a href="${task.additional_link}" class="task-link" target="_blank">📎 Additional Information</a>` : ''}
                 <div style="margin-top:10px; display:flex; gap:10px;">
-                    ${(currentUser.role === 'manager' || (currentUser.role === 'employee' && task.assigned_to === currentUser.username)) ? `<button class="btn" style="padding:8px 15px; font-size:0.95em; background:#ffc107; color:#2c3e50;" onclick="openEditModal(${task.id})">Edit</button>` : ''}
+                    ${(currentUser.role === 'manager' || (currentUser.role === 'employee' && task.assigned_to === currentUser.name)) ? `
+                        <button class=\"btn\" style=\"padding:8px 15px; font-size:0.95em; background:#ffc107; color:#2c3e50;\" onclick=\"openEditModal(${task.id})\">Edit</button>
+                        <button class=\"btn\" style=\"padding:8px 15px; font-size:0.95em; background:#dc3545; color:#fff;\" onclick=\"deleteTask(${task.id})\">Delete</button>
+                    ` : ''}
                 </div>
                 <div class="task-comments" id="comments-for-${task.id}" style="margin-top:20px;">
                     <div style="font-weight:600; color:#667eea; margin-bottom:8px;">💬 Comments</div>
@@ -1218,6 +1221,21 @@ ${task.additional_link ? `🔗 <b>Additional Info:</b> ${task.additional_link}` 
             users.forEach(user => {
                 assignedToSelect.innerHTML += `<option value="${user.name}">${user.name} (${user.phone})</option>`;
             });
+        }
+
+        // Add deleteTask function
+        async function deleteTask(taskId) {
+            if (!confirm('Are you sure you want to delete this task?')) return;
+            const { error } = await _supabase
+                .from('tasks')
+                .delete()
+                .eq('id', taskId);
+            if (error) {
+                showNotification('❌ Failed to delete task');
+            } else {
+                showNotification('Task deleted!');
+                await loadTasks();
+            }
         }
     </script>
 </body>
