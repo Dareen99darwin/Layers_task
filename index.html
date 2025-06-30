@@ -760,7 +760,7 @@
             // No longer needed, tasks are saved in Supabase
         }
 
-        // Update task creation to use Supabase
+        // Update task creation to send notification before reloading tasks
         const taskForm = document.getElementById('taskForm');
         if (taskForm) {
             taskForm.addEventListener('submit', async function(e) {
@@ -779,14 +779,14 @@
                 const added = await addTaskToSupabase(newTask);
                 if (added) {
                     showNotification('Task created in cloud!');
+                    await sendTelegramNotification(added, assignedTo);
                     await loadTasks();
                     this.reset();
-                    await sendTelegramNotification(added, assignedTo);
                 }
             });
         }
 
-        // Update task editing to use Supabase
+        // Update task editing to always send notification after update
         const editTaskForm = document.getElementById('editTaskForm');
         if (editTaskForm) {
             editTaskForm.addEventListener('submit', async function(e) {
@@ -794,7 +794,6 @@
                 const id = parseInt(document.getElementById('editTaskId').value);
                 const task = tasks.find(t => t.id === id);
                 if (!task) return;
-                const oldStatus = task.status;
                 // Update fields to match Supabase schema
                 task.title = document.getElementById('editTaskTitle').value;
                 task.description = document.getElementById('editTaskDescription').value;
@@ -804,13 +803,9 @@
                 task.additional_link = document.getElementById('editAdditionalLink').value;
                 const updated = await updateTaskInSupabase(task);
                 if (updated) {
+                    await sendTelegramNotification(updated, updated.assigned_to, true);
                     await loadTasks();
                     closeEditModal();
-                    if (currentUser.role === 'manager') {
-                        await sendTelegramNotification(updated, updated.assigned_to, true);
-                    } else if (currentUser.role === 'employee' && oldStatus !== task.status) {
-                        await notifyManagerOfStatusChange(updated);
-                    }
                     showNotification('Task updated in cloud!');
                 }
             });
