@@ -438,14 +438,6 @@
                                 ⚠️ Team members need to message @layers2025_bot first to receive notifications
                             </small>
                         </div>
-
-                        <div class="form-group">
-                            <label for="testChatId">Test Chat ID (Optional)</label>
-                            <input type="text" id="testChatId" placeholder="Enter your Telegram chat ID for testing">
-                            <small style="color: #6c757d; margin-top: 5px; display: block;">
-                                Message @layers2025_bot with /start to get your chat ID
-                            </small>
-                        </div>
                     </div>
 
                     <div class="form-row">
@@ -773,10 +765,6 @@
         if (taskForm) {
             taskForm.addEventListener('submit', async function(e) {
                 e.preventDefault();
-                if (currentUser.role !== 'manager') {
-                    showNotification('❌ Only managers can create tasks');
-                    return;
-                }
                 const assignedTo = document.getElementById('assignedTo').value;
                 const newTask = {
                     title: document.getElementById('taskTitle').value,
@@ -963,16 +951,25 @@
         }
 
         // Telegram notification functions
-        async function sendTelegramNotification(task, username, notifyUpdate = false) {
+        async function sendTelegramNotification(task, assignedToName, notifyUpdate = false) {
+            // Look up the assigned user's chat_id in Supabase
+            const { data, error } = await _supabase
+                .from('users')
+                .select('chat_id')
+                .eq('name', assignedToName)
+                .single();
+
+            if (error || !data || !data.chat_id) {
+                showNotification('⚠️ Task created, but the assigned user has not linked their Telegram.');
+                return;
+            }
+            const chatId = data.chat_id;
+
+            const message = notifyUpdate
+                ? `✏️ <b>Task Updated</b>\n\n📋 <b>Title:</b> ${task.title}\n👤 <b>Assigned to:</b> ${task.assigned_to}\n🔥 <b>Priority:</b> ${task.priority.toUpperCase()}\n⏰ <b>Deadline:</b> ${new Date(task.deadline).toLocaleString()}\n📝 <b>Status:</b> ${task.status.replace('-', ' ')}\n\n<b>Description:</b>\n${task.description || 'No description provided'}\n${task.additional_link ? `🔗 <b>Additional Info:</b> ${task.additional_link}` : ''}\n\n<i>Task updated on ${new Date().toLocaleString()}</i>`
+                : formatTaskMessage(task);
+
             try {
-                const chatId = userChatIds[username] || '';
-                if (!chatId) {
-                    showNotification('⚠️ Task updated! But user has no Telegram chat ID.');
-                    return;
-                }
-                const message = notifyUpdate ?
-                    `✏️ <b>Task Updated</b>\n\n📋 <b>Title:</b> ${task.title}\n👤 <b>Assigned to:</b> ${task.assigned_to}\n🔥 <b>Priority:</b> ${task.priority.toUpperCase()}\n⏰ <b>Deadline:</b> ${new Date(task.deadline).toLocaleString()}\n📝 <b>Status:</b> ${task.status.replace('-', ' ')}\n\n<b>Description:</b>\n${task.description || 'No description provided'}\n${task.additional_link ? `🔗 <b>Additional Info:</b> ${task.additional_link}` : ''}\n\n<i>Task updated on ${new Date().toLocaleString()}</i>`
-                    : formatTaskMessage(task);
                 const response = await fetch(`${TELEGRAM_API_URL}/sendMessage`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
