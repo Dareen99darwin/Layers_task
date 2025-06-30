@@ -873,8 +873,8 @@
                 ${task.additional_link ? `<a href="${task.additional_link}" class="task-link" target="_blank">📎 Additional Information</a>` : ''}
                 <div style="margin-top:10px; display:flex; gap:10px;">
                     ${(currentUser.role === 'manager' || (currentUser.role === 'employee' && task.assigned_to === currentUser.name)) ? `
-                        <button class=\"btn\" style=\"padding:8px 15px; font-size:0.95em; background:#ffc107; color:#2c3e50;\" onclick=\"openEditModal(${task.id})\">Edit</button>
-                        <button class=\"btn\" style=\"padding:8px 15px; font-size:0.95em; background:#dc3545; color:#fff;\" onclick=\"deleteTask(${task.id})\">Delete</button>
+                        <button class="btn" style="padding:8px 15px; font-size:0.95em; background:#ffc107; color:#2c3e50;" onclick="openEditModal(${task.id})">Edit</button>
+                        <button class="btn" style="padding:8px 15px; font-size:0.95em; background:#dc3545; color:#fff;" onclick="deleteTask(${task.id})">Delete</button>
                     ` : ''}
                 </div>
                 <div class="task-comments" id="comments-for-${task.id}" style="margin-top:20px;">
@@ -886,7 +886,6 @@
                     </form>
                 </div>
             `;
-            // After rendering, fetch and display comments
             setTimeout(() => loadAndDisplayComments(task.id), 0);
             return card;
         }
