@@ -423,6 +423,11 @@
                         <textarea id="taskDescription" placeholder="Describe the task in detail..."></textarea>
                     </div>
 
+                    <div class="form-group">
+                        <label for="taskInfo">Task Information</label>
+                        <textarea id="taskInfo" placeholder="Enter any extra task information..."></textarea>
+                    </div>
+
                     <div class="form-row">
                         <div class="form-group">
                             <label for="assignedTo">Assigned To</label>
@@ -535,6 +540,10 @@
                 <div class="form-group">
                     <label for="editTaskDescription">Task Description</label>
                     <textarea id="editTaskDescription"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="editTaskInfo">Task Information</label>
+                    <textarea id="editTaskInfo" placeholder="Enter any extra task information..."></textarea>
                 </div>
                 <div class="form-row">
                     <div class="form-group">
@@ -769,6 +778,7 @@
                 const newTask = {
                     title: document.getElementById('taskTitle').value,
                     description: document.getElementById('taskDescription').value,
+                    task_info: document.getElementById('taskInfo').value,
                     assigned_to: assignedTo,
                     priority: document.getElementById('priority').value,
                     status: document.getElementById('status').value,
@@ -797,6 +807,7 @@
                 // Update fields to match Supabase schema
                 task.title = document.getElementById('editTaskTitle').value;
                 task.description = document.getElementById('editTaskDescription').value;
+                task.task_info = document.getElementById('editTaskInfo').value;
                 task.priority = document.getElementById('editPriority').value;
                 task.status = document.getElementById('editStatus').value;
                 task.deadline = document.getElementById('editDeadline').value;
@@ -865,6 +876,7 @@
                     <div>🔥 <strong>Priority:</strong> ${task.priority}</div>
                 </div>
                 <div class="task-description">${task.description}</div>
+                ${task.task_info ? `<div style='margin: 10px 0; color: #444;'><strong>Task Information:</strong><br>${task.task_info}</div>` : ''}
                 ${task.additional_link ? `<a href="${task.additional_link}" class="task-link" target="_blank">📎 Additional Information</a>` : ''}
                 <div style="margin-top:10px; display:flex; gap:10px;">
                     ${(task.assigned_to === currentUser.name) ?
@@ -1074,21 +1086,56 @@ ${task.additional_link ? `🔗 <b>Additional Info:</b> ${task.additional_link}` 
             }, 3000);
         }
 
+        // Track deadline alerts in localStorage
+        function getDeadlineAlerts() {
+            return JSON.parse(localStorage.getItem('deadlineAlerts') || '{}');
+        }
+        function setDeadlineAlerts(alerts) {
+            localStorage.setItem('deadlineAlerts', JSON.stringify(alerts));
+        }
+
         // Check for upcoming deadlines
         function checkDeadlines() {
             const now = new Date();
             const oneHourFromNow = new Date(now.getTime() + 60 * 60 * 1000);
-            
+            const halfHourFromNow = new Date(now.getTime() + 30 * 60 * 1000);
+            let alerts = getDeadlineAlerts();
+            let changed = false;
+
             tasks.forEach(task => {
                 if (task.status !== 'completed') {
                     const deadline = new Date(task.deadline);
-                    
-                    // Check if deadline is within 1 hour
-                    if (deadline > now && deadline <= oneHourFromNow) {
+                    const taskId = task.id;
+                    if (!alerts[taskId]) alerts[taskId] = {};
+
+                    // 1 hour before
+                    if (
+                        deadline > now && deadline <= oneHourFromNow &&
+                        !alerts[taskId]['1h']
+                    ) {
                         sendDeadlineAlert(task);
+                        alerts[taskId]['1h'] = true;
+                        changed = true;
+                    }
+                    // 30 minutes before
+                    if (
+                        deadline > now && deadline <= halfHourFromNow &&
+                        !alerts[taskId]['30m']
+                    ) {
+                        sendDeadlineAlert(task);
+                        alerts[taskId]['30m'] = true;
+                        changed = true;
+                    }
+                    // Clean up alerts for completed or past tasks
+                    if (deadline < now || task.status === 'completed') {
+                        if (alerts[taskId]) {
+                            delete alerts[taskId];
+                            changed = true;
+                        }
                     }
                 }
             });
+            if (changed) setDeadlineAlerts(alerts);
         }
 
         // Send daily summary
@@ -1130,6 +1177,7 @@ ${task.additional_link ? `🔗 <b>Additional Info:</b> ${task.additional_link}` 
             document.getElementById('editTaskId').value = task.id;
             document.getElementById('editTaskTitle').value = task.title;
             document.getElementById('editTaskDescription').value = task.description;
+            document.getElementById('editTaskInfo').value = task.task_info || '';
             document.getElementById('editPriority').value = task.priority;
             document.getElementById('editStatus').value = task.status;
             document.getElementById('editDeadline').value = task.deadline;
