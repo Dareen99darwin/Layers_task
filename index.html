@@ -599,27 +599,37 @@
                 e.preventDefault();
                 const name = document.getElementById('loginName').value.trim();
                 const phone = document.getElementById('loginPhone').value.trim();
-                if (!name || !phone) return;
-                currentUser = {
-                    name: name,
-                    phone: phone
-                };
-                // Save user in Supabase if not already present
-                await addUserToSupabase(name, phone);
-                // Save session user
-                localStorage.setItem('sessionUser', JSON.stringify(currentUser));
-                // Show main app
-                document.getElementById('loginSection').style.display = 'none';
-                document.getElementById('mainApp').style.display = 'block';
-                updateUIForRole();
-                await loadTasks();
-                updateStats();
-                displayTasks();
-                setupDeadlineChecks();
-                showNotification(`Welcome back, ${currentUser.name}!`);
-                // Update assignedTo dropdown for create task
-                await populateAssignedToDropdown();
+                const success = await loginUser(name, phone);
+                if (success) {
+                    document.getElementById('loginSection').style.display = 'none';
+                    document.getElementById('mainApp').style.display = 'block';
+                    updateUIForRole();
+                    await loadTasks();
+                    updateStats();
+                    displayTasks();
+                    setupDeadlineChecks();
+                    showNotification(`Welcome back, ${currentUser.name}!`);
+                    await populateAssignedToDropdown();
+                }
             });
+        }
+
+        async function loginUser(name, phone) {
+            // Query Supabase for a user with this name and phone
+            const { data, error } = await supabase
+                .from('users')
+                .select('*')
+                .eq('name', name)
+                .eq('phone', phone)
+                .single();
+            if (error || !data) {
+                showNotification('User not found. Please register with the Telegram bot first!');
+                return false;
+            }
+            // User found, proceed with login
+            currentUser = data;
+            localStorage.setItem('sessionUser', JSON.stringify(currentUser));
+            return true;
         }
 
         // Update UI based on user role
