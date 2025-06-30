@@ -634,24 +634,16 @@
 
         // Update UI based on user role
         function updateUIForRole() {
-            const welcomeMsg = document.getElementById('welcomeMessage');
-            const roleIndicator = document.getElementById('roleIndicator');
-            const createTab = document.getElementById('createTab');
-            
-            welcomeMsg.textContent = `Welcome, ${currentUser.name}`;
-            
-            if (currentUser.role === 'manager') {
-                roleIndicator.textContent = '👑 MANAGER';
-                roleIndicator.style.background = '#28a745';
-                roleIndicator.style.color = 'white';
-                createTab.style.display = 'block';
-            } else {
-                roleIndicator.textContent = '👤 EMPLOYEE';
-                roleIndicator.style.background = '#6c757d';
-                roleIndicator.style.color = 'white';
-                createTab.style.display = 'none'; // Employees can't create tasks
-            }
-        }
+    const welcomeMsg = document.getElementById('welcomeMessage');
+    const createTab = document.getElementById('createTab');
+    welcomeMsg.textContent = `Welcome, ${currentUser.name}`;
+    // Viewer mode: hide create task for View/0987
+    if (currentUser.name === 'View' && currentUser.phone === '0987') {
+        createTab.style.display = 'none';
+    } else {
+        createTab.style.display = 'block';
+    }
+}
 
         // Logout function
         function logout() {
