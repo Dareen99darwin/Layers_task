@@ -616,7 +616,7 @@
 
         async function loginUser(name, phone) {
             // Query Supabase for a user with this name and phone
-            const { data, error } = await supabase
+            const { data, error } = await _supabase
                 .from('users')
                 .select('*')
                 .eq('name', name)
@@ -705,7 +705,7 @@
 
         // Supabase CRUD for tasks
         async function fetchTasksFromSupabase() {
-            const { data, error } = await supabase
+            const { data, error } = await _supabase
                 .from('tasks')
                 .select('*')
                 .order('created_at', { ascending: false });
@@ -717,7 +717,7 @@
         }
 
         async function addTaskToSupabase(task) {
-            const { data, error } = await supabase
+            const { data, error } = await _supabase
                 .from('tasks')
                 .insert([task]);
             if (error) {
@@ -728,7 +728,7 @@
         }
 
         async function updateTaskInSupabase(task) {
-            const { data, error } = await supabase
+            const { data, error } = await _supabase
                 .from('tasks')
                 .update(task)
                 .eq('id', task.id);
@@ -741,7 +741,7 @@
 
         // Supabase CRUD for comments
         async function fetchCommentsForTask(taskId) {
-            const { data, error } = await supabase
+            const { data, error } = await _supabase
                 .from('comments')
                 .select('*')
                 .eq('task_id', taskId)
@@ -754,7 +754,7 @@
         }
 
         async function addCommentToTask(taskId, author, content) {
-            const { data, error } = await supabase
+            const { data, error } = await _supabase
                 .from('comments')
                 .insert([{ task_id: taskId, author, content }]);
             if (error) {
@@ -1193,11 +1193,11 @@ ${task.additional_link ? `🔗 <b>Additional Info:</b> ${task.additional_link}` 
         // Add Supabase JS client in <head> (before </head>):
         const SUPABASE_URL = 'https://xbyhaadzohsbxgloxkdx.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhieWhhYWR6b2hzYnhnbG94a2R4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTEyMjgwMTMsImV4cCI6MjA2NjgwNDAxM30.WLb3NNz0ydBZoC_KWUx0IKvHd-lk0XDx5cOu9GhJP7A';
-        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        const _supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         // Add Supabase users table CRUD
         async function fetchUsersFromSupabase() {
-            const { data, error } = await supabase
+            const { data, error } = await _supabase
                 .from('users')
                 .select('*');
             if (error) {
@@ -1208,7 +1208,7 @@ ${task.additional_link ? `🔗 <b>Additional Info:</b> ${task.additional_link}` 
         }
 
         async function addUserToSupabase(name, phone) {
-            const { data, error } = await supabase
+            const { data, error } = await _supabase
                 .from('users')
                 .insert([{ name, phone }]);
             if (error) {
