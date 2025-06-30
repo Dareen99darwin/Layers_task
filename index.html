@@ -953,7 +953,7 @@
         }
 
         // Telegram notification functions
-        async function sendTelegramNotification(task, assignedToName, notifyUpdate = false) {
+        async function sendTelegramNotification(task, assignedToName, notifyUpdate = false, isDelete = false) {
             // Look up the assigned user's chat_id in Supabase
             const { data, error } = await _supabase
                 .from('users')
@@ -962,14 +962,19 @@
                 .single();
 
             if (error || !data || !data.chat_id) {
-                showNotification('⚠️ Task created, but the assigned user has not linked their Telegram.');
+                showNotification('⚠️ Notification not sent: user has not linked their Telegram.');
                 return;
             }
             const chatId = data.chat_id;
 
-            const message = notifyUpdate
-                ? `✏️ <b>Task Updated</b>\n\n📋 <b>Title:</b> ${task.title}\n👤 <b>Assigned to:</b> ${task.assigned_to}\n🔥 <b>Priority:</b> ${task.priority.toUpperCase()}\n⏰ <b>Deadline:</b> ${new Date(task.deadline).toLocaleString()}\n📝 <b>Status:</b> ${task.status.replace('-', ' ')}\n\n<b>Description:</b>\n${task.description || 'No description provided'}\n${task.additional_link ? `🔗 <b>Additional Info:</b> ${task.additional_link}` : ''}\n\n<i>Task updated on ${new Date().toLocaleString()}</i>`
-                : formatTaskMessage(task);
+            let message;
+            if (isDelete) {
+                message = `🗑️ <b>Task Deleted</b>\n\n📋 <b>Title:</b> ${task.title}\n👤 <b>Assigned to:</b> ${task.assigned_to}\n\n<i>Task was deleted on ${new Date().toLocaleString()}</i>`;
+            } else if (notifyUpdate) {
+                message = `✏️ <b>Task Updated</b>\n\n📋 <b>Title:</b> ${task.title}\n👤 <b>Assigned to:</b> ${task.assigned_to}\n🔥 <b>Priority:</b> ${task.priority.toUpperCase()}\n⏰ <b>Deadline:</b> ${new Date(task.deadline).toLocaleString()}\n📝 <b>Status:</b> ${task.status.replace('-', ' ')}\n\n<b>Description:</b>\n${task.description || 'No description provided'}\n${task.additional_link ? `🔗 <b>Additional Info:</b> ${task.additional_link}` : ''}\n\n<i>Task updated on ${new Date().toLocaleString()}</i>`;
+            } else {
+                message = formatTaskMessage(task);
+            }
 
             try {
                 const response = await fetch(`${TELEGRAM_API_URL}/sendMessage`, {
@@ -1007,71 +1012,50 @@ ${task.additional_link ? `🔗 <b>Additional Info:</b> ${task.additional_link}` 
         }
 
         async function sendDeadlineAlert(task) {
-            try {
-                const chatId = document.getElementById('testChatId').value;
-                if (!chatId) return;
+            // Look up chat_id for the assigned user
+            const { data, error } = await _supabase
+                .from('users')
+                .select('chat_id')
+                .eq('name', task.assigned_to)
+                .single();
+            if (error || !data || !data.chat_id) return;
 
-                const message = `⚠️ <b>DEADLINE ALERT</b>
+            const chatId = data.chat_id;
+            const message = `⚠️ <b>DEADLINE ALERT</b>\n\n📋 <b>Task:</b> ${task.title}\n👤 <b>Assigned to:</b> ${task.assigned_to}\n⏰ <b>Due in 1 hour:</b> ${new Date(task.deadline).toLocaleString()}\n🔥 <b>Priority:</b> ${task.priority.toUpperCase()}\n\n<b>Don't forget to complete this task!</b>`;
 
-📋 <b>Task:</b> ${task.title}
-👤 <b>Assigned to:</b> ${task.assigned_to}
-⏰ <b>Due in 1 hour:</b> ${new Date(task.deadline).toLocaleString()}
-🔥 <b>Priority:</b> ${task.priority.toUpperCase()}
-
-<b>Don't forget to complete this task!</b>`;
-
-                await fetch(`${TELEGRAM_API_URL}/sendMessage`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        chat_id: chatId,
-                        text: message,
-                        parse_mode: 'HTML'
-                    })
-                });
-            } catch (error) {
-                console.error('Deadline alert error:', error);
-            }
+            await fetch(`${TELEGRAM_API_URL}/sendMessage`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ chat_id: chatId, text: message, parse_mode: 'HTML' })
+            });
         }
 
         async function sendDailySummaryMessage(upcomingTasks) {
-            try {
-                const chatId = document.getElementById('testChatId').value;
-                if (!chatId) return;
+            // Group tasks by assigned_to
+            const tasksByUser = {};
+            upcomingTasks.forEach(task => {
+                if (!tasksByUser[task.assigned_to]) tasksByUser[task.assigned_to] = [];
+                tasksByUser[task.assigned_to].push(task);
+            });
 
-                let message = `📅 <b>Daily Task Summary</b>
+            for (const assignedTo in tasksByUser) {
+                const { data, error } = await _supabase
+                    .from('users')
+                    .select('chat_id')
+                    .eq('name', assignedTo)
+                    .single();
+                if (error || !data || !data.chat_id) continue;
 
-<b>Tasks due by tomorrow (${upcomingTasks.length} total):</b>
-
-`;
-
-                if (upcomingTasks.length === 0) {
-                    message += "🎉 No tasks due tomorrow! You're all caught up.";
-                } else {
-                    upcomingTasks.forEach((task, index) => {
-                        message += `${index + 1}. <b>${task.title}</b>
-   ⏰ Due: ${new Date(task.deadline).toLocaleString()}
-   🔥 Priority: ${task.priority.toUpperCase()}
-
-`;
-                    });
-                }
+                let message = `📅 <b>Daily Task Summary</b>\n\n<b>Tasks due by tomorrow (${tasksByUser[assignedTo].length} total):</b>\n\n`;
+                tasksByUser[assignedTo].forEach((task, idx) => {
+                    message += `${idx + 1}. <b>${task.title}</b>\n   ⏰ Due: ${new Date(task.deadline).toLocaleString()}\n   🔥 Priority: ${task.priority.toUpperCase()}\n\n`;
+                });
 
                 await fetch(`${TELEGRAM_API_URL}/sendMessage`, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        chat_id: chatId,
-                        text: message,
-                        parse_mode: 'HTML'
-                    })
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ chat_id: data.chat_id, text: message, parse_mode: 'HTML' })
                 });
-            } catch (error) {
-                console.error('Daily summary error:', error);
             }
         }
 
@@ -1225,6 +1209,8 @@ ${task.additional_link ? `🔗 <b>Additional Info:</b> ${task.additional_link}` 
         // Add deleteTask function
         async function deleteTask(taskId) {
             if (!confirm('Are you sure you want to delete this task?')) return;
+            // Find the task before deleting for notification
+            const task = tasks.find(t => t.id === taskId);
             const { error } = await _supabase
                 .from('tasks')
                 .delete()
@@ -1233,6 +1219,9 @@ ${task.additional_link ? `🔗 <b>Additional Info:</b> ${task.additional_link}` 
                 showNotification('❌ Failed to delete task');
             } else {
                 showNotification('Task deleted!');
+                if (task) {
+                    await sendTelegramNotification(task, task.assigned_to, false, true);
+                }
                 await loadTasks();
             }
         }
